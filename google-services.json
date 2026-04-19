@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "883320325512",
+    "project_id": "anfatakip",
+    "storage_bucket": "anfatakip.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883320325512:android:1778ab5e11d2ee64f7263d",
+        "android_client_info": {
+          "package_name": "io.kodular.oveclerfaaliyet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNQWx8RuTzNTbSz4xbnTLcG-cuPWg90og"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
