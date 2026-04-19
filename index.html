@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ANFA Takip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ANFA Takip">
+    <meta name="apple-mobile-web-app-title" content="ANFA Takip">
+    <meta name="theme-color" content="#1b5e20">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#f2f2f2; overflow-x:hidden; }
+        
+        /* 5 SANİYE TAM EKRAN GIF (SPLASH SCREEN) */
+        #splashScreen {
+            position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:#fff; display:flex; justify-content:center; 
+            align-items:center; z-index:9999;
+        }
+        #splashScreen img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        #header {
+            background:#1b5e20; color:white; height:90px; 
+            display:flex; align-items:center; justify-content:space-between; 
+            padding:0 15px; box-sizing:border-box;
+        }
+
+        #appTitle { text-align:center; font-family:'Comic Sans MS',cursive; font-size:32px; flex-grow:1; }
+
+        #menu {
+            position:fixed; top:0; left:-240px; width:240px; height:100%;
+            background:#fff; box-shadow:2px 0 5px rgba(0,0,0,0.3);
+            transition:0.3s; z-index:1000; padding-top:20px;
+        }
+
+        .menu-item {
+            padding:15px; border-bottom:1px solid #eee; cursor:pointer;
+            display:flex; align-items:center; color:#333; text-decoration:none;
+        }
+
+        .menu-item i { margin-right:10px; width:20px; text-align:center; color:#1b5e20; }
+
+        #content { display:none; position:fixed; top:90px; left:0; width:100%; height:calc(100% - 90px); background:white; z-index:500; }
+        iframe { width:100%; height:100%; border:none; }
+
+        #backFloat {
+            position:fixed; bottom:20px; right:20px; background:#1b5e20;
+            color:white; width:50px; height:50px; border-radius:50%;
+            display:none; align-items:center; justify-content:center;
+            z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer;
+        }
+
+        /* GÖREV LİSTESİ VE NOTLAR */
+        #tasksBox { padding:15px; }
+        .input-group { background:white; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:15px; }
+        input[type="text"], input[type="datetime-local"] { width:100%; padding:10px; margin:5px 0; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
+        .add-btn { width:100%; padding:12px; background:#1b5e20; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
+        th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; font-size:14px; }
+        th { background:#1b5e20; color:white; }
+        .done { text-decoration: line-through; color: gray; }
+    </style>
+</head>
+<body>
+
+<div id="splashScreen">
+    <img src="anfa.gif" alt="Açılış">
+</div>
+
+<div id="header">
+    <i class="fa fa-bars" style="font-size:24px; cursor:pointer;" onclick="toggleMenu()"></i>
+    <div id="appTitle">ANFA</div>
+    <div style="width:24px;"></div>
+</div>
+
+<div id="menu">
+    <div class="menu-item" onclick="goHome()"><i class="fa fa-home"></i> ANA SAYFA</div>
+    <div class="menu-item" onclick="loadPage('filist.html')"><i class="fa fa-address-book"></i> REHBER</div>
+    <div class="menu-item" onclick="loadPage('olay_bildir.html')"><i class="fa fa-exclamation-triangle"></i> OLAY BİLDİR</div>
+    <div class="menu-item" onclick="loadPage('templates.html')"><i class="fa fa-file-alt"></i> HAZIR TUTANAKLAR</div>
+    <div class="menu-item" onclick="loadPage('vardiya.html')"><i class="fa fa-clock"></i> VARDİYA TAKİP</div>
+    <div class="menu-item" onclick="loadPage('personel_takip.html')"><i class="fa fa-users"></i> PERSONEL TAKİP</div>
+    <div class="menu-item" onclick="loadPage('park_doluluk.html')"><i class="fa fa-chart-pie"></i> PARK DOLULUK</div>
+    <div class="menu-item" onclick="loadPage('kolaj.html')"><i class="fa fa-th-large"></i> KOLAJ OLUŞTUR</div>
+</div>
+
+<div id="content">
+    <iframe id="frame" src=""></iframe>
+</div>
+
+<div id="tasksBox">
+    <div class="input-group">
+        <h4><i class="fa fa-edit"></i> Yeni Görev / Not</h4>
+        <input type="text" id="taskInput" placeholder="Görevi buraya yazın...">
+        <label>Başlangıç:</label>
+        <input type="datetime-local" id="startDateTime">
+        <label>Bitiş:</label>
+        <input type="datetime-local" id="endDateTime">
+        <button class="add-btn" onclick="addTask()">EKLE</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>GÖREV</th>
+                <th>BAŞLAMA</th>
+                <th>BİTİŞ</th>
+                <th>İŞLEM</th>
+            </tr>
+        </thead>
+        <tbody id="taskList">
+            </tbody>
+    </table>
+</div>
+
+<div id="backFloat" onclick="goHome()">
+    <i class="fa fa-arrow-left"></i>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+    // 5 Saniye Tam Ekran Splash Ayarı
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const ss = document.getElementById('splashScreen');
+            ss.style.transition = "opacity 0.8s";
+            ss.style.opacity = "0";
+            setTimeout(() => ss.style.display = 'none', 800);
+        }, 5000);
+    });
+
+    // Menü Aç/Kapat
+    function toggleMenu() {
+        const menu = document.getElementById("menu");
+        menu.style.left = (menu.style.left === "0px") ? "-240px" : "0px";
+    }
+
+    // Alt Sayfaları Iframe İçine Yükle
+    function loadPage(url) {
+        document.getElementById("content").style.display = "block";
+        document.getElementById("tasksBox").style.display = "none";
+        document.getElementById("frame").src = url; 
+        document.getElementById("menu").style.left = "-240px";
+        document.getElementById("backFloat").style.display = "flex";
+    }
+
+    // Ana Sayfaya Dön
+    function goHome() {
+        document.getElementById("content").style.display = "none";
+        document.getElementById("tasksBox").style.display = "block";
+        document.getElementById("backFloat").style.display = "none";
+        document.getElementById("frame").src = "";
+        document.getElementById("menu").style.left = "-240px";
+    }
+
+    // PWA Service Worker Kaydı
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').then(function(reg) {
+                console.log('PWA Kaydı Başarılı.');
+            }).catch(function(err) {
+                console.log('PWA Kaydı Hatası:', err);
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
+
