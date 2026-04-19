@@ -7,14 +7,28 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1b5e20">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="logo.png">
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" async=""></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "YOUR_ONESIGNAL_APP_ID_HERE",
+                safari_web_id: "YOUR_SAFARI_WEB_ID_HERE",
+                notifyButton: { enable: true },
+            });
+        });
+    </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
         body { margin:0; font-family:Arial,sans-serif; background:#f2f2f2; overflow-x:hidden; }
         
-        /* 5 SANİYE TAM EKRAN GIF */
+        /* 5 SANİYE SPLASH SCREEN */
         #splashScreen {
             position:fixed; top:0; left:0; width:100%; height:100%; 
             background:#fff; display:flex; justify-content:center; 
@@ -41,16 +55,17 @@
         .menu-item {
             padding:15px; border-bottom:1px solid #eee; cursor:pointer;
             display:flex; align-items:center; color:#333; text-decoration:none;
-            text-transform: uppercase; font-weight: bold; font-size: 14px;
+            font-weight: bold; font-size: 14px;
         }
 
         .menu-item i { margin-right:10px; width:20px; text-align:center; color:#1b5e20; }
 
-        /* YAZIYI YUKARI KALDIRDIK VE NETLEŞTİRDİK */
+        /* GELİŞTİRİCİ NOTU - YUKARI KAYDIRILDI */
         .dev-note {
-            padding: 20px 15px; font-size: 12px; color: #444; 
-            text-align: center; border-top: 1px solid #ddd;
-            background: #f1f1f1; font-style: italic; font-weight: bold;
+            padding: 25px 15px; font-size: 13px; color: #1b5e20; 
+            text-align: center; border-top: 2px solid #eee;
+            background: #f9f9f9; font-style: italic; font-weight: bold;
+            margin-top: auto;
         }
 
         #content { display:none; position:fixed; top:90px; left:0; width:100%; height:calc(100% - 90px); background:white; z-index:500; }
@@ -63,13 +78,12 @@
             z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer;
         }
 
-        /* GÖREV LİSTESİ / NOTLAR (Orijinal Tasarımın) */
         #tasksBox { padding:15px; }
         .input-group { background:white; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:15px; }
         input[type="text"], input[type="datetime-local"] { width:100%; padding:10px; margin:5px 0; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
         .add-btn { width:100%; padding:12px; background:#1b5e20; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
         table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
-        th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; font-size:13px; text-transform: uppercase; }
+        th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; font-size:13px; }
         th { background:#1b5e20; color:white; }
     </style>
 </head>
@@ -108,7 +122,7 @@
 <div id="tasksBox">
     <div class="input-group">
         <h4><i class="fa fa-edit"></i> YENİ GÖREV / NOT</h4>
-        <input type="text" id="taskInput" placeholder="Görevi buraya yazın...">
+        <input type="text" id="taskInput" placeholder="GÖREVİ YAZIN...">
         <label>BAŞLANGIÇ:</label>
         <input type="datetime-local" id="startDateTime">
         <label>BİTİŞ:</label>
@@ -136,7 +150,7 @@
 <script src="app.js"></script>
 
 <script>
-    // 5 Saniye Splash
+    // SPLASH KONTROLÜ
     window.addEventListener('load', () => {
         setTimeout(() => {
             const ss = document.getElementById('splashScreen');
@@ -151,13 +165,11 @@
         menu.style.left = (menu.style.left === "0px") ? "-240px" : "0px";
     }
 
-    // SENİN ORİJİNAL SAYFA YÜKLEME MANTIĞIN (KODULAR/ANDROID UYUMLU)
     function loadPage(url) {
         document.getElementById("content").style.display = "block";
         document.getElementById("tasksBox").style.display = "none";
         const frame = document.getElementById("frame");
         
-        // Eğer GitHub'daysan direkt url, Android asset içindeyse file yolu
         if(window.location.protocol === 'file:') {
             frame.src = "file:///android_asset/" + url;
         } else {
@@ -173,19 +185,29 @@
         document.getElementById("tasksBox").style.display = "block";
         document.getElementById("backFloat").style.display = "none";
         document.getElementById("frame").src = "";
-        document.getElementById("menu").style.left = "-240px";
     }
 
-    // PWA Kaydı
+    // PWA & YÜKLEME BUTONU TETİKLEYİCİ
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // 3 saniye sonra yükleme teklifi çıkar
+        setTimeout(() => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+            }
+        }, 3000);
+    });
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('PWA Kaydı Başarılı');
-            }).catch(err => console.log('PWA Hatası:', err));
+            navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA Servis Kaydı Tamam'))
+            .catch(err => console.log('Hata:', err));
         });
     }
 </script>
-
 </body>
 </html>
-
