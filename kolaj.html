@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dikmen Kolaj Pro · Galeriye Kaydet</title>
+  <title>Profesyonel Kolaj Oluşturucu</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
@@ -32,15 +32,17 @@
     canvas { width: 100%; height: auto; border-radius: 15px; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; }
-    .modal input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; font-size: 1.1rem; outline: none; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; }
+    .modal label { font-size: 0.85rem; font-weight: bold; color: #555; }
+    .modal input { width: 100%; padding: 12px; margin: 8px 0 18px 0; border: 2px solid #eee; border-radius: 10px; font-size: 1rem; outline: none; }
+    .modal input:focus { border-color: #3498db; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h2 style="font-size: 1.4rem;">📸 Dikmen Kolaj <span style="font-size: 0.8rem; color: #3498db;">v5 FINAL</span></h2>
+    <h2 id="mainTitle" style="font-size: 1.4rem;">📸 Kolaj <span style="font-size: 0.8rem; color: #3498db;">v6 PRO</span></h2>
     <button class="settings-btn" onclick="toggleModal(true)"><i class="fas fa-cog"></i></button>
   </header>
 
@@ -54,22 +56,27 @@
   <div class="preview-grid" id="previewGrid"></div>
 
   <button class="btn btn-create" onclick="generateCollage()"><i class="fas fa-layer-group"></i> Kolajı Oluştur</button>
-  <button class="btn btn-download" id="dlBtn" onclick="downloadCollage()" disabled><i class="fas fa-save"></i> Galeriye Kaydet (İndir)</button>
+  <button class="btn btn-download" id="dlBtn" onclick="downloadCollage()" disabled><i class="fas fa-save"></i> Galeriye Kaydet</button>
   <button class="btn btn-whatsapp" id="waBtn" onclick="shareWhatsApp()" disabled><i class="fab fa-whatsapp"></i> WhatsApp'a Gönder</button>
   <button class="btn" style="background:#eee; color:#666;" onclick="location.reload()">Sıfırla</button>
 
   <div id="resultArea">
     <canvas id="collageCanvas"></canvas>
-    <p style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px;">Resim yukarıda hazır!</p>
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px;">Kolaj hazır! Yukarıdaki butondan kaydedebilirsin.</p>
   </div>
 </div>
 
 <div class="modal" id="settingsModal">
   <div class="modal-content">
-    <h3 style="margin-bottom: 5px;">WhatsApp Numarası</h3>
-    <p style="font-size: 0.8rem; color: #666;">Numarayı 5XXXXXXXXX şeklinde girin.</p>
-    <input type="tel" id="phoneInput" placeholder="532XXXXXXX">
-    <button class="btn btn-create" style="margin-bottom: 5px;" onclick="saveSettings()">Kaydet</button>
+    <h3 style="margin-bottom: 15px; text-align: center;">Uygulama Ayarları</h3>
+    
+    <label>Alt Yazı (Bölge İsmi)</label>
+    <input type="text" id="regionInput" placeholder="Örn: DİKMEN BÖLGESİ">
+
+    <label>WhatsApp Numarası</label>
+    <input type="tel" id="phoneInput" placeholder="5XXXXXXXXX">
+    
+    <button class="btn btn-create" style="margin-bottom: 5px;" onclick="saveSettings()">Değişiklikleri Kaydet</button>
     <button class="btn" style="background:#eee; margin:0;" onclick="toggleModal(false)">Kapat</button>
   </div>
 </div>
@@ -78,21 +85,41 @@
   let selectedImages = [];
   const canvas = document.getElementById('collageCanvas');
   const ctx = canvas.getContext('2d');
-  const CANVAS_SIZE = 1000; // Sabit Kare Boyut (Yüksek Çözünürlük)
-  const FOOTER_SIZE = 120; // Alt Yazı Alanı
+  const CANVAS_SIZE = 1000;
+  const FOOTER_SIZE = 120;
+
+  // Sayfa yüklendiğinde ayarları kontrol et
+  window.onload = () => {
+    const savedRegion = localStorage.getItem('app_region');
+    if(savedRegion) {
+      document.getElementById('mainTitle').innerText = savedRegion;
+    }
+  };
 
   function toggleModal(show) {
     document.getElementById('settingsModal').style.display = show ? 'flex' : 'none';
-    if(show) document.getElementById('phoneInput').value = localStorage.getItem('dikmen_wa') || '';
+    if(show) {
+      document.getElementById('phoneInput').value = localStorage.getItem('app_wa') || '';
+      document.getElementById('regionInput').value = localStorage.getItem('app_region') || 'DİKMEN BÖLGESİ';
+    }
   }
 
   function saveSettings() {
-    const val = document.getElementById('phoneInput').value.replace(/\D/g, '');
-    if(val.length >= 10) {
-      localStorage.setItem('dikmen_wa', val.slice(-10));
-      alert("Numara kaydedildi!");
-      toggleModal(false);
-    } else alert("Geçerli bir numara girin.");
+    const waVal = document.getElementById('phoneInput').value.replace(/\D/g, '');
+    const regionVal = document.getElementById('regionInput').value.trim();
+
+    if(regionVal.length < 2) {
+        alert("Lütfen geçerli bir bölge ismi girin.");
+        return;
+    }
+
+    localStorage.setItem('app_wa', waVal.slice(-10));
+    localStorage.setItem('app_region', regionVal);
+    
+    document.getElementById('mainTitle').innerText = regionVal;
+    
+    alert("Ayarlar başarıyla kaydedildi!");
+    toggleModal(false);
   }
 
   function handleFiles(files) {
@@ -123,7 +150,6 @@
     renderPreviews();
   };
 
-  // Resmi Kırpmadan Kutuyu Doldurma Fonksiyonu
   function drawCover(img, x, y, w, h) {
     const scale = Math.max(w / img.width, h / img.height);
     const iw = img.width * scale;
@@ -152,14 +178,12 @@
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE + FOOTER_SIZE;
 
-    // Arka Plan
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const n = imgs.length;
     const S = CANVAS_SIZE;
 
-    // YERLEŞİM ALGORİTMALARI
     if (n === 2) {
       drawCover(imgs[0], 0, 0, S/2 - 2, S);
       drawCover(imgs[1], S/2 + 2, 0, S/2, S);
@@ -192,14 +216,16 @@
       });
     }
 
-    // ALT YAZI
+    // DİNAMİC ALT YAZI (LOCAL STORAGE'DAN GELEN)
+    const displayRegion = localStorage.getItem('app_region') || "DİKMEN BÖLGESİ";
+    
     ctx.fillStyle = "white";
     ctx.fillRect(0, S, S, FOOTER_SIZE);
     ctx.fillStyle = "#1a2e3b";
     ctx.font = "bold 60px Inter, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("DİKMEN BÖLGESİ", S/2, S + (FOOTER_SIZE/2));
+    ctx.fillText(displayRegion.toUpperCase(), S/2, S + (FOOTER_SIZE/2));
 
     document.getElementById('resultArea').style.display = 'block';
     document.getElementById('waBtn').disabled = false;
@@ -207,16 +233,15 @@
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
-  // GALERİYE KAYDET FONKSİYONU
   function downloadCollage() {
     const link = document.createElement('a');
-    link.download = 'dikmen-kolaj-' + Date.now() + '.png';
+    link.download = 'kolaj-' + Date.now() + '.png';
     link.href = canvas.toDataURL("image/png");
     link.click();
   }
 
   function shareWhatsApp() {
-    const num = localStorage.getItem('dikmen_wa');
+    const num = localStorage.getItem('app_wa');
     if(!num) { alert("Numarayı kaydetmedin!"); return toggleModal(true); }
 
     canvas.toBlob(blob => {
@@ -225,7 +250,7 @@
         alert("✅ Kolaj kopyalandı! WhatsApp açılınca yapıştır yap.");
         window.open(`https://wa.me/90${num}`, '_blank');
       }).catch(() => {
-        alert("WhatsApp açılıyor. Resmi manuel kopyalayıp gönderebilirsin.");
+        alert("WhatsApp açılıyor. Resmi kopyalayıp gönderebilirsin.");
         window.open(`https://wa.me/90${num}`, '_blank');
       });
     });
@@ -233,4 +258,3 @@
 </script>
 </body>
 </html>
-
