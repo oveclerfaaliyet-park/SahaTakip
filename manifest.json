@@ -1,11 +1,13 @@
 {
   "name": "ANFA Takip Sistemi",
   "short_name": "ANFA",
-  "description": "Yasin Demirgan tarafından geliştirilen takip sistemi",
-  "start_url": "./index.html",
+  "description": "Yasin Demirgan Tarafından Geliştirildi",
+  "start_url": "/SahaTakip/index.html",
+  "scope": "/SahaTakip/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1b5e20",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "logo.png",
@@ -20,4 +22,3 @@
     }
   ]
 }
-
