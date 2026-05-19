@@ -1,23 +1,61 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+const taskList=document.getElementById('taskList');
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAs-Vl6_OicI8_gZ76-B8wLw9DkE5m_R7o",
-  authDomain: "oveclerfaaliyet-park.firebaseapp.com",
-  projectId: "oveclerfaaliyet-park",
-  storageBucket: "oveclerfaaliyet-park.appspot.com",
-  messagingSenderId: "543787729606",
-  appId: "1:543787729606:web:806950ec09fbe79bdfbf65"
-};
+function addTask(){
+  let taskInput=document.getElementById('taskInput');
+  let start=document.getElementById('startDateTime');
+  let end=document.getElementById('endDateTime');
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
+  if(taskInput.value.trim()==='') return;
 
-// iframe'lerin ana sayfadaki auth durumuna erişebilmesi için global yapıyoruz
-window.firebaseAuthInstance = auth;
-window.firebaseDbInstance = db;
+  const task=taskInput.value.toUpperCase();
+  const startVal=start.value?new Date(start.value):null;
+  const startDisplay=startVal?startVal.toLocaleString('tr-TR',{hour12:false}):'';
+  const endVal=end.value?new Date(end.value):null;
+  const endDisplay=endVal?endVal.toLocaleString('tr-TR',{hour12:false}):'';
 
-export { app, auth, db, provider, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc, setDoc, onAuthStateChanged, signInWithRedirect, getRedirectResult, signOut };
+  const tr=document.createElement('tr');
+
+  tr.dataset.start=startVal?startVal.getTime():0; // sıralama için timestamp
+
+  tr.innerHTML=`
+    <td>${task}</td>
+    <td>${startDisplay}</td>
+    <td>${endDisplay}</td>
+    <td>
+      <button onclick="toggleDone(this)">✔</button>
+      <button onclick="deleteTask(this)">🗑</button>
+    </td>
+  `;
+
+  taskList.appendChild(tr);
+  sortTasks(); // her eklemede sırala
+
+  taskInput.value='';
+  start.value='';
+  end.value='';
+}
+
+// Sırala fonksiyonu (başlangıç tarihine göre, büyükten küçüğe)
+function sortTasks(){
+  const rows = Array.from(taskList.querySelectorAll('tr'));
+  rows.sort((a,b)=>{
+    return (b.dataset.start - a.dataset.start);
+  });
+  rows.forEach(row=>taskList.appendChild(row));
+}
+
+function toggleDone(btn){
+  const tr=btn.closest('tr');
+  if(tr.style.backgroundColor==='red'){
+    tr.style.backgroundColor='';
+  }else{
+    tr.style.backgroundColor='red';
+  }
+}
+
+function deleteTask(btn){
+  const tr=btn.closest('tr');
+  if(confirm('Bu görevi silmek istediğine emin misin?')){
+    tr.remove();
+  }
+}

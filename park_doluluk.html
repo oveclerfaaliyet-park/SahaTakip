@@ -3,175 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ANFA Güvenlik - Park Doluluk</title>
+<title>ANFA Güvenlik</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-body{ font-family:'Poppins',sans-serif; margin:0; min-height:100vh; background:#fff; color:#0b2c4d; text-transform: uppercase; }
-header{ background:#0b5d1e; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center; font-size:18px; font-weight:600; }
+body{
+  font-family:'Poppins',sans-serif;
+  margin:0;
+  min-height:100vh;
+  background:#fff;
+  color:#0b2c4d;
+}
+
+header{
+  background:#0b5d1e;
+  color:#fff;
+  padding:20px;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:2px;
+}
+
 .container{padding:20px;max-width:600px;margin:auto}
-.card{ background:rgba(255,255,255,.95); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 8px 20px rgba(0,0,0,.15); }
+
+.card{
+  background:rgba(255,255,255,.95);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+
 label{font-weight:600;display:block;margin-bottom:6px}
-input,select{ width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; margin-bottom:10px; font-size:16px; text-transform: uppercase; }
-button{ width:100%; background:#0b5d1e; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:16px; }
-.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:2000; }
-.modal-content { background:white; padding:20px; border-radius:12px; width:90%; max-width:400px; }
-.hidden { display: none !important; }
-#raporText { background:#eee; padding:15px; border-radius:8px; white-space:pre-wrap; font-family:monospace; margin-top:10px; }
+
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-family:'Poppins';
+}
+
+button{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#0b5d1e,#1f8a3a);
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:active{transform:scale(.98)}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-content{
+  background:#fff;
+  padding:22px;
+  border-radius:16px;
+  width:90%;
+  max-width:400px;
+}
+
+.modal-content button{
+  margin-top:12px;
+}
 </style>
 </head>
 <body>
 
 <header>
-    <span id="headerTitle">PARK DOLULUK</span>
-    <button style="width:auto; padding:5px 10px; background:rgba(255,255,255,0.2);" onclick="openSettings()">⚙ AYARLAR</button>
+<div onclick="openSettings()">⚙️</div>
 </header>
 
-<div id="loginWarn" class="container" style="text-align:center; margin-top:40px;">
-    <h3>Lütfen ana sayfadan Google ile giriş yapınız.</h3>
+<div class="container">
+
+<div class="card" id="etapSelectCard">
+<label>Etap Seçimi</label>
+<select id="etapSelect">
+<option>1 Etap</option>
+<option selected>2 Etap</option>
+</select>
 </div>
 
-<div id="mainContent" class="container hidden">
-    <div class="card">
-        <label>VARDİYA SEÇİNİZ</label>
-        <select id="vardiyaSelect">
-            <option id="v1" value="08:00/20:00">08:00/20:00</option>
-            <option id="v2" value="20:00/08:00">20:00/08:00</option>
-        </select>
-
-        <label>DOLULUK ORANI (%)</label>
-        <input type="number" id="dolulukInput" placeholder="Örn: 45">
-
-        <label>VATANDAŞ SAYISI</label>
-        <input type="number" id="vatandasInput" placeholder="Örn: 150">
-    </div>
-
-    <div class="card">
-        <h4>RAPOR METNİ</h4>
-        <div id="raporText"></div>
-        <button onclick="kopyalaRapor()" style="margin-top:10px; background:#4285F4;">METNİ KOPYALA</button>
-    </div>
+<div class="card">
+<label>Vardiya</label>
+<select id="vardiyaSelect">
+<option id="v1">08:00/20:00</option>
+<option id="v2">20:00/08:00</option>
+</select>
 </div>
 
+<div class="card">
+<label>Doluluk Oranı (%)</label>
+<input type="number" id="dolulukInput">
+</div>
+
+<div class="card">
+<label>Vatandaş Sayısı</label>
+<input type="number" id="vatandasInput">
+</div>
+
+<div class="card" id="raporText"></div>
+
+<button onclick="copyText()">Metni Kopyala</button>
+
+</div>
+
+<!-- AYARLAR -->
 <div id="settingsModal" class="modal">
-    <div class="modal-content">
-        <h3>Sistem Ayarları</h3>
-        <label>BÖLGE ADI</label>
-        <input type="text" id="bolgeSet">
-        <label>PARK ADI</label>
-        <input type="text" id="parkSet">
-        <label>VARDİYA 1 SAATLERİ</label>
-        <input type="text" id="vardiya1Set">
-        <label>VARDİYA 2 SAATLERİ</label>
-        <input type="text" id="vardiya2Set">
-        <button onclick="saveSettings()">AYARLARI KAYDET</button>
-        <button onclick="closeSettings()" style="background:#d32f2f; margin-top:5px;">KAPAT</button>
-    </div>
+<div class="modal-content">
+<h3>Ayarlar</h3>
+
+<label>Bölge</label>
+<input id="bolgeSet">
+
+<label>Park</label>
+<input id="parkSet">
+
+<label>1. Vardiya Saati</label>
+<input id="vardiya1Set">
+
+<label>2. Vardiya Saati</label>
+<input id="vardiya2Set">
+
+<label>Etap Aç / Kapat</label>
+<button onclick="toggleEtap()">Etap Durumu</button>
+
+<button onclick="closeSettings()">Kapat</button>
+</div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+<script>
+let etapOpen=true;
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAs-Vl6_OicI8_gZ76-B8wLw9DkE5m_R7o",
-    authDomain: "oveclerfaaliyet-park.firebaseapp.com",
-    projectId: "oveclerfaaliyet-park",
-    storageBucket: "oveclerfaaliyet-park.appspot.com",
-    messagingSenderId: "543787729606",
-    appId: "1:543787729606:web:806950ec09fbe79bdfbf65"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUserId = null;
-let userSettings = {
-    bolge: "DİKMEN BÖLGESİ",
-    park: "ÖVEÇLER VADİSİ PARKI",
-    v1: "08:00/20:00",
-    v2: "20:00/08:00"
-};
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUserId = user.uid;
-        document.getElementById("loginWarn").classList.add("hidden");
-        document.getElementById("mainContent").classList.remove("hidden");
-        
-        // Firestore'dan kullanıcının özel ayarlarını oku
-        const docRef = doc(db, "users", user.uid, "config", "parkSettings");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            userSettings = docSnap.data();
-        }
-        applySettingsToUI();
-    } else {
-        currentUserId = null;
-        document.getElementById("loginWarn").classList.remove("hidden");
-        document.getElementById("mainContent").classList.add("hidden");
-    }
-});
-
-function applySettingsToUI() {
-    document.getElementById("v1").value = userSettings.v1;
-    document.getElementById("v1").innerText = userSettings.v1;
-    document.getElementById("v2").value = userSettings.v2;
-    document.getElementById("v2").innerText = userSettings.v2;
-    buildText();
+function nowDate(){
+const d=new Date();
+return d.toLocaleDateString("tr-TR");
+}
+function nowTime(){
+const d=new Date();
+return d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
 }
 
-window.openSettings = () => {
-    document.getElementById("bolgeSet").value = userSettings.bolge;
-    document.getElementById("parkSet").value = userSettings.park;
-    document.getElementById("vardiya1Set").value = userSettings.v1;
-    document.getElementById("vardiya2Set").value = userSettings.v2;
-    document.getElementById("settingsModal").style.display = "flex";
-};
+function buildText(){
+const text=`
+${nowDate()} Tarihinde
+${vardiyaSelect.value} vardiyasında
+${nowTime()} saatinde parkımızdaki
 
-window.closeSettings = () => {
-    document.getElementById("settingsModal").style.display = "none";
-};
+Doluluk oranı : %${dolulukInput.value||""}
+Vatandaş sayısı: ${vatandasInput.value||""}
 
-window.saveSettings = async () => {
-    if(!currentUserId) return;
-    userSettings = {
-        bolge: document.getElementById("bolgeSet").value.toUpperCase(),
-        park: document.getElementById("parkSet").value.toUpperCase(),
-        v1: document.getElementById("vardiya1Set").value,
-        v2: document.getElementById("vardiya2Set").value
-    };
-    await setDoc(doc(db, "users", currentUserId, "config", "parkSettings"), userSettings);
-    applySettingsToUI();
-    closeSettings();
-};
-
-function buildText() {
-    const vSelect = document.getElementById("vardiyaSelect").value;
-    const doluluk = document.getElementById("dolulukInput").value || "0";
-    const vatandas = document.getElementById("vatandasInput").value || "0";
-    const simdi = new Date();
-    
-    let text = `${simdi.toLocaleDateString('tr-TR')} TARİHİNDE\n`;
-    text += `${vSelect} VARDİYASINDA\n`;
-    text += `${simdi.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})} SAATİNDE ${userSettings.park} \n\n`;
-    text += `DOLULUK ORANI : %${doluluk}\n`;
-    text += `VATANDAŞ SAYISI: ${vatandas}\n\n`;
-    text += `BİLGİNİZE MÜDÜRÜM.`;
-    
-    document.getElementById("raporText").innerText = text;
+Bilginize Müdürüm.
+`;
+raporText.innerText=text;
 }
 
-window.kopyalaRapor = () => {
-    const text = document.getElementById("raporText").innerText;
-    navigator.clipboard.writeText(text);
-    alert("RAPOR METNİ PANOYA KOPYALANDI!");
-};
-
-["vardiyaSelect", "dolulukInput", "vatandasInput"].forEach(id => {
-    document.getElementById(id).addEventListener("input", buildText);
+setInterval(buildText,1000);
+["vardiyaSelect","dolulukInput","vatandasInput"].forEach(e=>{
+document.getElementById(e).oninput=buildText;
 });
+
+function openSettings(){
+bolgeSet.value=localStorage.bolge||"DİKMEN BÖLGESİ";
+parkSet.value=localStorage.park||"ÖVEÇLER VADİSİ PARKI";
+
+vardiya1Set.value=localStorage.v1||"08:00/20:00";
+vardiya2Set.value=localStorage.v2||"20:00/08:00";
+
+v1.innerText=vardiya1Set.value;
+v2.innerText=vardiya2Set.value;
+
+settingsModal.style.display="flex";
+}
+function closeSettings(){settingsModal.style.display="none";}
+
+bolgeSet.oninput=()=>localStorage.bolge=bolgeSet.value;
+parkSet.oninput=()=>localStorage.park=parkSet.value;
+
+vardiya1Set.oninput=()=>{
+localStorage.v1=vardiya1Set.value;
+v1.innerText=vardiya1Set.value;
+}
+
+vardiya2Set.oninput=()=>{
+localStorage.v2=vardiya2Set.value;
+v2.innerText=vardiya2Set.value;
+}
+
+function toggleEtap(){
+etapOpen=!etapOpen;
+etapSelectCard.style.display=etapOpen?"block":"none";
+}
+
+function copyText(){
+const sabitBaslik = `
+Çevre 1 Güvenlik Müdürlüğü
+${localStorage.bolge || "DİKMEN BÖLGESİ"}
+${localStorage.park || "ÖVEÇLER VADİSİ PARKI"}
+${etapSelect.value}
+
+`;
+navigator.clipboard.writeText(sabitBaslik + raporText.innerText);
+alert("Metin kopyalandı");
+}
+
+buildText();
 </script>
 </body>
 </html>
