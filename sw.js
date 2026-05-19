@@ -1,46 +1,40 @@
-const CACHE_NAME = 'anfa-saha-v4';
+const CACHE_NAME = 'anfa-takip-v1';
 const ASSETS = [
-  '/SahaTakip/',
-  '/SahaTakip/index.html',
-  '/SahaTakip/app.js',
-  '/SahaTakip/manifest.json',
-  '/SahaTakip/logo.png',
-  '/SahaTakip/anfa.gif',
+  './',
+  './index.html',
+  './app.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
 ];
 
-// Yükleme ve Önbelleğe Alma
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('Dosyalar önbelleğe alınıyor...');
+// Service Worker Yükleme ve Önbelleğe Alma
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
-    })
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Eski Önbelleği Temizleme ve Güncelleme
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
+// Eski Önbellekleri Temizleme
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Veri Çekme (İnternet yoksa veya hafıza silindiyse GitHub'dan kurtar)
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/SahaTakip/index.html');
-        }
-      });
+// Çevrimdışı İstekleri Karşılama (Önbellekten Getir, Yoksa Ağa Git)
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((cachedResponse) => {
+      return cachedResponse || fetch(e.request);
     })
   );
 });
