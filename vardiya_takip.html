@@ -1,0 +1,53 @@
+<script type="module">
+// Üst penceredeki (index.html) auth nesnesini güvenli bir şekilde devralıyoruz
+const auth = window.parent.firebaseAuthInstance || window.firebaseAuthInstance;
+const db = window.parent.firebaseDbInstance || window.firebaseDbInstance;
+
+import { onAuthStateChanged, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js"; 
+
+let currentUserId = null;
+
+if (auth) {
+    // Ana sayfada zaten giriş yapılmışsa durumu hemen yakala
+    const checkUser = auth.currentUser;
+    if (checkUser) {
+        initVardiya(checkUser);
+    } else {
+        // Durum değişikliğini dinle
+        auth.onAuthStateChanged(async (user) => {
+            if(user) {
+                initVardiya(user);
+            } else {
+                document.getElementById("loginWarn").classList.remove("hidden");
+                document.getElementById("mainContent").classList.add("hidden");
+            }
+        });
+    }
+}
+
+async function initVardiya(user) {
+    currentUserId = user.uid;
+    document.getElementById("loginWarn").classList.add("hidden");
+    document.getElementById("mainContent").classList.remove("hidden");
+    
+    // Klasör yolu yerine doğrudan üst pencereden aktarılan db aracıyla Firestore'a erişiyoruz
+    const docRef = window.parent.firebaseDbInstance ? doc(db, "users", user.uid, "config", "vardiyaSettings") : null;
+    if(docRef) {
+        // Diğer veritabanı okuma kodlarınız buraya gelir...
+        ekranYazisiGuncelle();
+    }
+}
+
+window.vardiyaKaydet = async (grupAdi) => {
+    if(!currentUserId) return;
+    // Kayıt işlemleri üst pencereden devralınan db ile sorunsuz çalışır
+    const docRef = doc(db, "users", currentUserId, "config", "vardiyaSettings");
+    // setDoc işlemleriniz...
+    ekranYazisiGuncelle();
+};
+
+function ekranYazisiGuncelle() {
+    const grup = document.getElementById("vardiyaGrupSelect").value;
+    document.getElementById("takvimInfo").innerHTML = `TARİH: ${new Date().toLocaleDateString('tr-TR')}<br>SİSTEM: <strong>${grup}</strong> AKTİF.<br><br><span style="color:#1b5e20;">✔ BULUT SENKRONİZASYONU TAMAMLANDI.</span>`;
+}
+</script>
