@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang=\"tr\">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <title>ANFA Takip</title>
@@ -21,43 +21,54 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; background: #f2f2f2; overflow-x: hidden; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f2f2f2; overflow-x: hidden; text-transform: uppercase; }
         #header { background: #1b5e20; color: white; height: 90px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; }
         #appTitle { text-align: center; font-family: 'Comic Sans MS', cursive; font-size: 32px; font-weight: bold; flex-grow: 1; }
         
-        /* Giriş ve Profil Alanı Stil Kartı */
-        .auth-container { background: white; padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        .btn-auth { background: #4285F4; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 25px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; font-weight: bold; }
-        .btn-auth:hover { background: #357ae8; }
-        .btn-logout { background: #d32f2f; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px white solid; }
+        /* Kimlik Doğrulama Kartı Tasarımı */
+        .auth-container { background: white; padding: 30px 20px; margin: 40px auto; max-width: 450px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box; }
+        .auth-container h2 { color: #1b5e20; margin-top: 0; font-size: 24px; }
+        .auth-container p { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .btn-auth { background: #4285F4; color: white; border: none; padding: 14px 28px; font-size: 16px; border-radius: 30px; cursor: pointer; display: inline-flex; align-items: center; gap: 12px; font-weight: bold; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 10px rgba(66,133,244,0.3); }
+        .btn-auth:hover { background: #357ae8; transform: translateY(-1px); }
+        .btn-auth:active { transform: translateY(1px); }
+        
+        /* Kullanıcı Profil Alanı */
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px white solid; object-fit: cover; }
+        .btn-logout { background: #d32f2f; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: background 0.2s; }
+        .btn-logout:hover { background: #b71c1c; }
 
         .hidden { display: none !important; }
 
-        /* Menü ve İçerik Yapısı */
+        /* Sol Menü Yapısı */
         #menuBtn { font-size: 28px; cursor: pointer; color: white; }
         #menu { position: fixed; left: -240px; top: 0; width: 240px; height: 100%; background: #1b5e20; transition: 0.3s; z-index: 999; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
         #menu a { display: block; padding: 15px 20px; color: white; text-decoration: none; font-size: 18px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         #menu a:hover { background: #2e7d32; }
         
+        /* Ana Görev Formu ve Tablo Alanı */
         #tasksBox { padding: 15px; max-width: 600px; margin: auto; }
         .form-group { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-size: 14px; }
+        .form-group input { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         
-        #addBtn { width: 100%; background: #1b5e20; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #addBtn { width: 100%; background: #1b5e20; color: white; border: none; padding: 14px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         #addBtn:hover { background: #2e7d32; }
 
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #1b5e20; color: white; }
-        .actions button { background: none; border: none; font-size: 18px; cursor: pointer; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #1b5e20; color: white; font-weight: bold; }
+        .actions { display: flex; gap: 8px; }
+        .actions button { background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px; transition: transform 0.1s; }
+        .actions button:hover { transform: scale(1.15); }
         .task-done { text-decoration: line-through; color: #888; background-color: #f9f9f9; }
 
+        /* Iframe ve Geri Dönüş Yapısı */
         #content { display: none; width: 100%; height: calc(100vh - 90px); border: none; }
         #backFloat { position: fixed; bottom: 20px; right: 20px; background: #d32f2f; color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1001; }
         
+        /* Ekran Koruyucu */
         #screenSaver { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; display: none; justify-content: center; align-items: center; }
         #screenSaverClock { color: #00ff00; font-size: 80px; font-family: monospace; }
     </style>
@@ -70,26 +81,26 @@
     
     <div id="userProfileArea" class="user-profile hidden">
         <img id="userAvatar" class="user-avatar" src="" alt="Profil">
-        <button class="btn-logout" onclick="handleLogout()">Çıkış</button>
+        <button class="btn-logout" onclick="handleLogout()">ÇIKIŞ</button>
     </div>
 </div>
 
 <div id="loginScreen" class="auth-container">
-    <h2>Saha Takip Sistemine Hoş Geldiniz</h2>
-    <p>Devam etmek ve kendi verilerinize erişmek için Google ile giriş yapın.</p>
+    <h2>SAHA TAKİP SİSTEMİ</h2>
+    <p>Uygulamayı kullanabilmek ve verilerinizi güvenli şekilde kaydetmek için lütfen Google hesabınızla giriş yapın.</p>
     <button class="btn-auth" onclick="handleLogin()">
-        <i class="fab fa-google"></i> Google ile Giriş Yap
+        <i class="fab fa-google"></i> GOOGLE İLE GİRİŞ YAP
     </button>
 </div>
 
 <div id="menu">
-    <a href="#" onclick="goHome()">Ana Sayfa / Görevler</a>
-    <a href="#" onclick="openPage('park_doluluk.html')">Park Doluluk Raporu</a>
-    <a href="#" onclick="openPage('olay_bildir.html')">Olay Bildir Pro</a>
-    <a href="#" onclick="openPage('personel_takip.html')">Personel Takip</a>
-    <a href="#" onclick="openPage('templates.html')">Dijital Tutanak</a>
-    <a href="#" onclick="openPage('vardiya_takip.html')">Vardiya Takip</a>
-    <a href="#" onclick="openPage('filist.html')">ANFA Rehber Pro</a>
+    <a href="#" onclick="goHome()">ANA SAYFA / GÖREVLER</a>
+    <a href="#" onclick="openPage('park_doluluk.html')">PARK DOLULUK RAPORU</a>
+    <a href="#" onclick="openPage('olay_bildir.html')">OLAY BİLDİR PRO</a>
+    <a href="#" onclick="openPage('personel_takip.html')">PERSONEL TAKİP</a>
+    <a href="#" onclick="openPage('templates.html')">DİJİTAL TUTANAK</a>
+    <a href="#" onclick="openPage('vardiya_takip.html')">VARDİYA TAKİP</a>
+    <a href="#" onclick="openPage('filist.html')">ANFA REHBER PRO</a>
 </div>
 
 <div id="tasksBox" class="hidden">
@@ -133,69 +144,77 @@
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-  // BURAYA KENDİ FİREBASE KONSOLUNDAN ALDIĞIN CONFIG NESNESİNİ YAPIŞTIR
+  // Görsellerden Çekilen Gerçek Canlı API ve Proje Bilgileri
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyAs-Vl6_OicI8_gZ76-B8wLw9DkE5m_R7o",
     authDomain: "oveclerfaaliyet-park.firebaseapp.com",
     projectId: "oveclerfaaliyet-park",
     storageBucket: "oveclerfaaliyet-park.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    messagingSenderId: "543787729606",
+    appId: "1:543787729606:web:806950ec09fbe79bdfbf65"
   };
 
-  // Firebase Başlatma
+  // Firebase Servislerini Başlat
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // Global erişim için fonksiyonları window nesnesine bağlıyoruz
+  let currentUserId = null;
+  let unsubscribeTasks = null;
+
+  // Google ile Giriş Yapma Tetikleyicisi
   window.handleLogin = async () => {
       try {
           await signInWithPopup(auth, provider);
       } catch (error) {
-          console.error("Giriş hatası:", error);
-          alert("Giriş yapılırken hata oluştu: " + error.message);
+          console.error("Giriş Hatası:", error);
+          alert("Giriş işlemi başarısız oldu: " + error.message);
       }
   };
 
+  // Oturumu Kapatma Tetikleyicisi
   window.handleLogout = () => {
       signOut(auth).then(() => {
           location.reload();
+      }).catch((error) => {
+          console.error("Çıkış Hatası:", error);
       });
   };
 
-  // Kullanıcı Durum Takibi (Oturum açıldı mı kapandı mı?)
-  let currentUserId = null;
-  let unsubscribeTasks = null;
-
+  // Kullanıcı Durum Değişikliklerini Dinle (Auth Listener)
   onAuthStateChanged(auth, (user) => {
       if (user) {
           currentUserId = user.uid;
+          
+          // Arayüz Görünürlük Ayarları
           document.getElementById("loginScreen").classList.add("hidden");
           document.getElementById("tasksBox").classList.remove("hidden");
           document.getElementById("userProfileArea").classList.remove("hidden");
-          document.getElementById("userAvatar").src = user.photoURL || "https://via.placeholder.com/32";
+          document.getElementById("userAvatar").src = user.photoURL || "https://via.placeholder.com/38";
           
-          // Kullanıcıya özel dinamik Firestore dinleyicisini başlat (Rules ile tam uyumlu)
-          listenToTasks(user.uid);
+          // Kurallara uygun alt koleksiyon dinleyicisini çalıştır
+          listenToUserTasks(user.uid);
       } else {
           currentUserId = null;
           if (unsubscribeTasks) unsubscribeTasks();
+          
           document.getElementById("loginScreen").classList.remove("hidden");
           document.getElementById("tasksBox").classList.add("hidden");
           document.getElementById("userProfileArea").classList.add("hidden");
+          document.getElementById("taskList").innerHTML = "";
       }
   });
 
-  // Görevleri Gerçek Zamanlı Listeleme
-  function listenToTasks(userId) {
+  // Gerçek Zamanlı Firestore Veri Akışı (Kurallarla Uyumlu: users/{userId}/tasks)
+  function listenToUserTasks(userId) {
       const tasksRef = collection(db, "users", userId, "tasks");
-      const q = query(tasksRef, orderBy("createdAt", "desc")); // Yeni eklenen en üstte
+      // Yeni eklenen veya başlangıç tarihi en yakın olan görevleri en üstte listeler
+      const q = query(tasksRef, orderBy("startTimestamp", "desc"));
 
       unsubscribeTasks = onSnapshot(q, (snapshot) => {
-          const taskList = document.getElementById('taskList');
-          taskList.innerHTML = "";
+          const taskListHtml = document.getElementById('taskList');
+          taskListHtml.innerHTML = "";
           
           snapshot.forEach((docSnapshot) => {
               const data = docSnapshot.data();
@@ -211,24 +230,24 @@
                 <td>${data.startDisplay || ''}</td>
                 <td>${data.endDisplay || ''}</td>
                 <td class="actions">
-                  <button onclick="handleToggleDone('${id}', ${data.done || false})">✔</button>
-                  <button onclick="handleDeleteTask('${id}')">🗑</button>
+                  <button onclick="handleToggleDone('${id}', ${data.done || false})" title="Durumu Değiştir">✔</button>
+                  <button onclick="handleDeleteTask('${id}')" title="Sil">🗑</button>
                 </td>
               `;
-              taskList.appendChild(tr);
+              taskListHtml.appendChild(tr);
           });
       }, (error) => {
-          console.error("Firestore okuma hatası:", error);
+          console.error("Veri okuma/kural hatası:", error);
       });
   }
 
-  // Görev Ekleme Fonksiyonu
+  // Yeni Görev Ekleme Mantığı
   window.handleAddTask = async () => {
       if (!currentUserId) return;
       
-      let taskInput = document.getElementById('taskInput');
-      let start = document.getElementById('startDateTime');
-      let end = document.getElementById('endDateTime');
+      const taskInput = document.getElementById('taskInput');
+      const start = document.getElementById('startDateTime');
+      const end = document.getElementById('endDateTime');
 
       if (taskInput.value.trim() === '') return;
 
@@ -248,17 +267,17 @@
               createdAt: Date.now()
           });
 
-          // Formu temizle
+          // Form alanlarını sıfırla
           taskInput.value = '';
           start.value = '';
           end.value = '';
       } catch (error) {
-          console.error("Görev eklenirken hata oluştu: ", error);
-          alert("Ekleme yetkiniz yok veya bir hata oluştu.");
+          console.error("Görev ekleme hatası:", error);
+          alert("Kayıt ekleme yetkiniz yok veya bir hata oluştu.");
       }
   };
 
-  // Görev Durumu Güncelleme (Tamamlandı/Yapılacak)
+  // Görevi Tamamlandı / Yapılacak Olarak İşaretleme
   window.handleToggleDone = async (id, currentStatus) => {
       if (!currentUserId) return;
       const taskDocRef = doc(db, "users", currentUserId, "tasks", id);
@@ -267,19 +286,19 @@
               done: !currentStatus
           });
       } catch (error) {
-          console.error("Güncelleme hatası: ", error);
+          console.error("Güncelleme hatası:", error);
       }
   };
 
-  // Görev Silme
+  // Görevi Kalıcı Olarak Silme
   window.handleDeleteTask = async (id) => {
       if (!currentUserId) return;
-      if (confirm("BU GÖREVİ SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?")) {
+      if (confirm("BU GÖREVİ LİSTEDEN SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?")) {
           const taskDocRef = doc(db, "users", currentUserId, "tasks", id);
           try {
               await deleteDoc(taskDocRef);
           } catch (error) {
-              console.error("Silme hatası: ", error);
+              console.error("Silme hatası:", error);
           }
       }
   };
@@ -299,7 +318,7 @@ function openPage(url) {
     document.getElementById("tasksBox").style.display = "none";
     document.getElementById("loginScreen").style.display = "none";
     
-    const frame = document.getElementById("frame") || document.getElementById("content");
+    const frame = document.getElementById("content");
     frame.style.display = "block";
     frame.src = url;
 
@@ -308,6 +327,7 @@ function openPage(url) {
 }
 
 function goHome() {
+    // Kullanıcının oturum açıp açmadığını kontrol ederek ana ekrana döndür
     const isLoginHidden = document.getElementById("loginScreen").classList.contains("hidden");
     
     if (isLoginHidden) {
@@ -321,7 +341,7 @@ function goHome() {
     document.getElementById("content").src = "";
 }
 
-// Saat ve Ekran Koruyucu Yönetimi
+// Ekran Koruyucu Yönetimi (60 Saniye Hareketsizlik)
 let sonDokunma = Date.now();
 let ekranKoruyucuAcik = false;
 const SCREEN_TIMEOUT = 60000;
