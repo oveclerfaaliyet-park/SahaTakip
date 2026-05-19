@@ -5,6 +5,8 @@
     <title>ANFA Takip</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" async=""></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -196,6 +198,15 @@ setInterval(() => {
         document.getElementById("screenSaver").style.display = "block";
     }
 }, 1000);
+
+// PWA İÇİN GEREKLİ DEĞİŞİKLİK 2: Service Worker Kayıt Kodu
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker başarıyla kaydedildi:', reg.scope))
+      .catch(err => console.log('Service Worker kaydı başarısız:', err));
+  });
+}
 </script>
 
 </body>
