@@ -3,205 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Olay Bildir Pro - Dikmen</title>
+<title>Olay Bildir Pro</title>
 <style>
-    /* Üst bar kaldırıldı, genel boşluklar düzenlendi */
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; color: #333; }
-    .container { max-width: 650px; margin: 30px auto; padding: 25px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 25px; }
-    .header h2 { margin: 0; color: #198754; font-size: 24px; }
-    
-    .settings-btn { font-size: 24px; background: #f0f0f0; border: none; cursor: pointer; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-    .settings-btn:hover { transform: rotate(45deg); background: #e0e0e0; }
-    
-    label { font-weight: 600; margin: 15px 0 5px; display: block; color: #444; font-size: 14px; }
-    input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 15px; transition: 0.2s; background: #fff; }
-    input:focus, select:focus { border-color: #198754; outline: none; box-shadow: 0 0 0 3px rgba(25,135,84,0.1); }
-    
-    textarea { min-height: 100px; resize: vertical; }
-    .row { display: flex; gap: 12px; margin: 30px 0 10px; }
-    
-    button { padding: 14px; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; flex: 1; }
-    .primary { background: #198754; color: white; }
-    .primary:hover { background: #157347; }
-    .secondary { background: #0d6efd; color: white; }
-    .secondary:hover { background: #0b5ed7; }
-    button:active { transform: scale(0.97); }
-    
-    .output { background: #fcfcfc; padding: 20px; border: 2px dashed #d1d1d1; border-radius: 12px; white-space: pre-wrap; margin-top: 25px; line-height: 1.6; font-family: 'Courier New', Courier, monospace; color: #222; font-size: 14px; }
-    
-    /* Modal Tasarımı */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
-    .modal-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-    .toggle-group { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
-    
-    /* Switch/Toggle */
-    .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: #198754; }
-    input:checked + .slider:before { transform: translateX(21px); }
+body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin:0; padding:0; text-transform: uppercase; }
+.container { max-width: 650px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+input, select, textarea { width:100%; padding:10px; margin-bottom:12px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; text-transform: uppercase;}
+button { width:100%; padding:12px; background:#0b462a; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;}
+#output { background:#222; color:#fff; padding:15px; border-radius:6px; white-space:pre-wrap; font-family:monospace; margin-top:15px;}
+.hidden { display:none !important; }
 </style>
 </head>
 <body>
 
-<div class="modal" id="ayarlarModal">
-    <div class="modal-box">
-        <span style="float:right; cursor:pointer; font-size:28px; color:#999;" onclick="kapatModal('ayarlarModal')">&times;</span>
-        <h2 style="margin-top:0;">⚙️ Ayarlar</h2>
-        
-        <div class="toggle-group"><span>Etap Bilgisini Göster</span><label class="switch"><input type="checkbox" id="showEtap" checked><span class="slider"></span></label></div>
-        <div class="toggle-group"><span>Bölge Bilgisini Göster</span><label class="switch"><input type="checkbox" id="showBolge" checked><span class="slider"></span></label></div>
-        <div class="toggle-group"><span>"Rekreasyon Alanı" Ekle</span><label class="switch"><input type="checkbox" id="showRekreasyon" checked><span class="slider"></span></label></div>
-
-        <label>Park/Alan İsmi</label><input id="parkIsmi" type="text" placeholder="Örn: ÖVEÇLER VADİSİ">
-        <label>Vardiya 1 (Gündüz)</label><input id="v1Input" placeholder="08:00 / 20:00">
-        <label>Vardiya 2 (Gece)</label><input id="v2Input" placeholder="20:00 / 08:00">
-        <label>Etap Listesi (Satır başı bir tane)</label><textarea id="etaplarListe"></textarea>
-        <label>Bölge Listesi (Satır başı bir tane)</label><textarea id="bolgelerListe"></textarea>
-        
-        <button class="primary" style="margin-top:20px; width:100%;" onclick="ayarlariKaydet()">Değişiklikleri Uygula</button>
-    </div>
+<div id="loginWarn" style="text-align:center; padding:5px;">
+    <h3>Lütfen ana sayfadan Google ile giriş yapınız.</h3>
 </div>
 
-<div class="container">
-    <div class="header">
-        <h2>Olay Raporu</h2>
-        <button class="settings-btn" onclick="acAyarlar()" title="Ayarlar">⚙️</button>
-    </div>
+<div id="mainContent" class="container hidden">
+    <h3>OLAY BİLDİR PRO</h3>
+    <label>VARDİYA</label>
+    <select id="vardiyaSelect">
+        <option value="08:00 / 20:00">GÜNDÜZ (08:00 / 20:00)</option>
+        <option value="20:00 / 08:00">GECE (20:00 / 08:00)</option>
+    </select>
 
-    <div id="etapSection">
-        <label>Etap Seçin</label>
-        <select id="etapSelect"></select>
-    </div>
+    <label>OLAY KONUSU</label>
+    <input type="text" id="konuInput" placeholder="Örn: ŞÜPHELİ ŞAHIS UZAKLAŞTIRILMASI">
 
-    <label>Olay Başlığı</label>
-    <input id="konu" placeholder="Örn: Aydınlatma Arızası Hakkında">
+    <label>ETAP SEÇİMİ</label>
+    <select id="etapSelect">
+        <option value="1. Etap">1. ETAP</option>
+        <option value="2. Etap">2. ETAP</option>
+        <option value="3. Etap">3. ETAP</option>
+        <option value="Park Geneli">PARK GENELİ</option>
+    </select>
 
-    <label>Vardiya Aralığı</label>
-    <select id="vardiyaSelect"></select>
+    <label>DETAYLI AÇIKLAMA</label>
+    <textarea id="detayInput" rows="4" placeholder="Olay detaylarını yazınız..."></textarea>
 
-    <div id="bolgeSection">
-        <label>Bölge Seçin</label>
-        <select id="bolgeSelect"></select>
-    </div>
-
-    <label>Olay Detayları</label>
-    <textarea id="detay" placeholder="Olayın detaylarını buraya yazın..."></textarea>
-
-    <div class="row">
-        <button class="primary" onclick="raporOlustur()">📄 Rapor Hazırla</button>
-        <button class="secondary" onclick="kopyala()">📋 Kopyala</button>
-    </div>
-
-    <div class="output" id="sonuc">Henüz bir rapor oluşturulmadı.</div>
+    <button onclick="olusturMetin()">RAPORU HAZIRLA</button>
+    <div id="output"></div>
+    <button onclick="kopyalaMetin()" style="background:#4285F4; margin-top:10px;">KOPYALA</button>
 </div>
 
-<script>
-// Başlangıç Değerleri
-const varsayilanEtaplar = ["ÖVEÇLER VADİSİ 1. ETAP", "ÖVEÇLER VADİSİ 2. ETAP"];
-const varsayilanBolgeler = ["Giriş Kapısı", "Orta Alan", "Süs Havuzu Yanı", "Çocuk Oyun Grubu", "Spor Alanı", "Park Geneli"];
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-function acAyarlar() { document.getElementById("ayarlarModal").style.display = "flex"; }
-function kapatModal(id) { document.getElementById(id).style.display = "none"; }
+const firebaseConfig = {
+    apiKey: "AIzaSyAs-Vl6_OicI8_gZ76-B8wLw9DkE5m_R7o",
+    authDomain: "oveclerfaaliyet-park.firebaseapp.com",
+    projectId: "oveclerfaaliyet-park",
+    storageBucket: "oveclerfaaliyet-park.appspot.com",
+    messagingSenderId: "543787729606",
+    appId: "1:543787729606:web:806950ec09fbe79bdfbf65"
+};
 
-function yukle() {
-    // Hafızadaki verileri çek
-    document.getElementById("parkIsmi").value = localStorage.getItem("parkIsmi") || "ÖVEÇLER VADİSİ PARKI";
-    document.getElementById("v1Input").value = localStorage.getItem("v1") || "08:00 / 20:00";
-    document.getElementById("v2Input").value = localStorage.getItem("v2") || "20:00 / 08:00";
-    document.getElementById("etaplarListe").value = JSON.parse(localStorage.getItem("etaplar") || JSON.stringify(varsayilanEtaplar)).join("\n");
-    document.getElementById("bolgelerListe").value = JSON.parse(localStorage.getItem("bolgeler") || JSON.stringify(varsayilanBolgeler)).join("\n");
-    
-    document.getElementById("showEtap").checked = localStorage.getItem("showEtap") !== "false";
-    document.getElementById("showBolge").checked = localStorage.getItem("showBolge") !== "false";
-    document.getElementById("showRekreasyon").checked = localStorage.getItem("showRekreasyon") !== "false";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-    guncelle();
-}
+onAuthStateChanged(auth, (user) => {
+    if(user) {
+        document.getElementById("loginWarn").classList.add("hidden");
+        document.getElementById("mainContent").classList.remove("hidden");
+    } else {
+        document.getElementById("loginWarn").classList.remove("hidden");
+        document.getElementById("mainContent").classList.add("hidden");
+    }
+});
 
-function guncelle() {
-    const etaplar = document.getElementById("etaplarListe").value.split("\n").filter(x => x.trim());
-    const bolgeler = document.getElementById("bolgelerListe").value.split("\n").filter(x => x.trim());
-    
-    const eSelect = document.getElementById("etapSelect");
-    eSelect.innerHTML = "";
-    etaplar.forEach(e => eSelect.add(new Option(e, e)));
-
-    const bSelect = document.getElementById("bolgeSelect");
-    bSelect.innerHTML = "";
-    bolgeler.forEach(b => bSelect.add(new Option(b, b)));
-
-    const vSelect = document.getElementById("vardiyaSelect");
-    vSelect.innerHTML = "";
-    vSelect.add(new Option(document.getElementById("v1Input").value, document.getElementById("v1Input").value));
-    vSelect.add(new Option(document.getElementById("v2Input").value, document.getElementById("v2Input").value));
-
-    document.getElementById("etapSection").style.display = document.getElementById("showEtap").checked ? "block" : "none";
-    document.getElementById("bolgeSection").style.display = document.getElementById("showBolge").checked ? "block" : "none";
-}
-
-function ayarlariKaydet() {
-    localStorage.setItem("parkIsmi", document.getElementById("parkIsmi").value);
-    localStorage.setItem("v1", document.getElementById("v1Input").value);
-    localStorage.setItem("v2", document.getElementById("v2Input").value);
-    localStorage.setItem("etaplar", JSON.stringify(document.getElementById("etaplarListe").value.split("\n").filter(x => x.trim())));
-    localStorage.setItem("bolgeler", JSON.stringify(document.getElementById("bolgelerListe").value.split("\n").filter(x => x.trim())));
-    localStorage.setItem("showEtap", document.getElementById("showEtap").checked);
-    localStorage.setItem("showBolge", document.getElementById("showBolge").checked);
-    localStorage.setItem("showRekreasyon", document.getElementById("showRekreasyon").checked);
-
-    guncelle();
-    kapatModal('ayarlarModal');
-}
-
-function raporOlustur() {
-    const park = document.getElementById("parkIsmi").value;
-    const konu = document.getElementById("konu").value || "Hizmet Aksaklığı";
+window.olusturMetin = () => {
     const vardiya = document.getElementById("vardiyaSelect").value;
-    const detay = document.getElementById("detay").value || "...";
-    
-    const sEtap = document.getElementById("showEtap").checked;
-    const sBolge = document.getElementById("showBolge").checked;
-    const sRek = document.getElementById("showRekreasyon").checked;
-
-    const etapFull = document.getElementById("etapSelect").value;
-    const match = etapFull.match(/\d+/);
-    const etapNo = match ? match[0] + ". Etap" : "";
-    
-    const bolge = document.getElementById("bolgeSelect").value;
-    const bolgeEki = (bolge.toLowerCase().includes("genel")) ? "park genelinde" : `${bolge} bölgesinde`;
-
+    const konu = document.getElementById("konuInput").value.toUpperCase();
+    const etap = document.getElementById("etapSelect").value;
+    const detay = document.getElementById("detayInput").value.toUpperCase();
     const simdi = new Date();
-    const tarih = simdi.toLocaleDateString('tr-TR');
-    const saat = simdi.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
 
-    let metin = `Çevre -1 Güvenlik Müdürlüğü\n\nDİKMEN BÖLGESİ\n${park.toUpperCase()}`;
-    if(sEtap && etapNo) metin += `  ${etapNo.toUpperCase()}`;
-    
-    metin += `\n\nKonu: ${konu}\n\n`;
-    metin += `${tarih} tarihinde, ${vardiya} vardiyasında saat: ${saat}'te `;
-    metin += `${park.replace("PARKI","").replace("Parkı","").trim()}`;
-    
-    if(sRek) metin += ` Rekreasyon Alanı`;
-    if(sEtap && etapNo) metin += ` ${etapNo}`;
-    if(sBolge) metin += ` ${bolgeEki}`;
-    
-    metin += ` ${detay}\n\nBilgilerinize Müdürüm.`;
-    document.getElementById("sonuc").textContent = metin;
-}
+    let metin = `ANFA GÜVENLİK RAPORU\n`;
+    metin += `TARİH: ${simdi.toLocaleDateString('tr-TR')} | SAAT: ${simdi.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}\n`;
+    metin += `VARDİYA: ${vardiya}\n`;
+    metin += `BÖLGE/ETAP: ${etap}\n`;
+    metin += `KONU: ${konu}\n\n`;
+    metin += `AÇIKLAMA: ${detay}\n\n`;
+    metin += `BİLGİLERİNİZE ARZ EDERİM.`;
 
-function kopyala() {
-    const text = document.getElementById("sonuc").textContent;
-    if(text.includes("Henüz bir rapor")) return;
-    navigator.clipboard.writeText(text);
-    alert("Kopyalandı!");
-}
+    document.getElementById("output").innerText = metin;
+};
 
-window.onload = yukle;
+window.kopyalaMetin = () => {
+    const out = document.getElementById("output").innerText;
+    if(!out) return;
+    navigator.clipboard.writeText(out);
+    alert("RAPOR PANOYA KOPYALANDI!");
+};
 </script>
-
 </body>
 </html>
