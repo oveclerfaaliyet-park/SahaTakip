@@ -1,213 +1,354 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang=\"tr\">
 <head>
     <meta charset="UTF-8">
     <title>ANFA Takip</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1b5e20">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="logo.png">
-
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" async=""></script>
     <script>
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: "YOUR_ONESIGNAL_APP_ID_HERE",
-                safari_web_id: "YOUR_SAFARI_WEB_ID_HERE",
-                notifyButton: { enable: true },
-            });
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "YOUR_ONESIGNAL_APP_ID_HERE",
+          safari_web_id: "YOUR_SAFARI_WEB_ID_HERE",
+          notifyButton: {
+            enable: true,
+          },
         });
+      });
     </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+
     <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#f2f2f2; overflow-x:hidden; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f2f2f2; overflow-x: hidden; }
+        #header { background: #1b5e20; color: white; height: 90px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-sizing: border-box; }
+        #appTitle { text-align: center; font-family: 'Comic Sans MS', cursive; font-size: 32px; font-weight: bold; flex-grow: 1; }
         
-        /* 5 SANİYE SPLASH SCREEN */
-        #splashScreen {
-            position:fixed; top:0; left:0; width:100%; height:100%; 
-            background:#fff; display:flex; justify-content:center; 
-            align-items:center; z-index:9999;
-        }
-        #splashScreen img { width: 100%; height: 100%; object-fit: cover; }
+        /* Giriş ve Profil Alanı Stil Kartı */
+        .auth-container { background: white; padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .btn-auth { background: #4285F4; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 25px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; font-weight: bold; }
+        .btn-auth:hover { background: #357ae8; }
+        .btn-logout { background: #d32f2f; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px white solid; }
 
-        #header {
-            background:#1b5e20; color:white; height:90px; 
-            display:flex; align-items:center; justify-content:space-between; 
-            padding:0 15px; box-sizing:border-box;
-        }
+        .hidden { display: none !important; }
 
-        #appTitle { text-align:center; font-family:'Comic Sans MS',cursive; font-size:32px; flex-grow:1; }
+        /* Menü ve İçerik Yapısı */
+        #menuBtn { font-size: 28px; cursor: pointer; color: white; }
+        #menu { position: fixed; left: -240px; top: 0; width: 240px; height: 100%; background: #1b5e20; transition: 0.3s; z-index: 999; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
+        #menu a { display: block; padding: 15px 20px; color: white; text-decoration: none; font-size: 18px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #menu a:hover { background: #2e7d32; }
+        
+        #tasksBox { padding: 15px; max-width: 600px; margin: auto; }
+        .form-group { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        #addBtn { width: 100%; background: #1b5e20; color: white; border: none; padding: 12px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #addBtn:hover { background: #2e7d32; }
 
-        #menu {
-            position:fixed; top:0; left:-240px; width:240px; height:100%;
-            background:#fff; box-shadow:2px 0 5px rgba(0,0,0,0.3);
-            transition:0.3s; z-index:1000; display: flex; flex-direction: column;
-        }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #1b5e20; color: white; }
+        .actions button { background: none; border: none; font-size: 18px; cursor: pointer; margin-right: 10px; }
+        .task-done { text-decoration: line-through; color: #888; background-color: #f9f9f9; }
 
-        .menu-items-wrapper { flex-grow: 1; overflow-y: auto; padding-top: 20px; }
-
-        .menu-item {
-            padding:15px; border-bottom:1px solid #eee; cursor:pointer;
-            display:flex; align-items:center; color:#333; text-decoration:none;
-            font-weight: bold; font-size: 14px;
-        }
-
-        .menu-item i { margin-right:10px; width:20px; text-align:center; color:#1b5e20; }
-
-        /* GELİŞTİRİCİ NOTU - YUKARI KAYDIRILDI */
-        .dev-note {
-            padding: 25px 15px; font-size: 13px; color: #1b5e20; 
-            text-align: center; border-top: 2px solid #eee;
-            background: #f9f9f9; font-style: italic; font-weight: bold;
-            margin-top: auto;
-        }
-
-        #content { display:none; position:fixed; top:90px; left:0; width:100%; height:calc(100% - 90px); background:white; z-index:500; }
-        iframe { width:100%; height:100%; border:none; }
-
-        #backFloat {
-            position:fixed; bottom:20px; right:20px; background:#1b5e20;
-            color:white; width:50px; height:50px; border-radius:50%;
-            display:none; align-items:center; justify-content:center;
-            z-index:1100; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer;
-        }
-
-        #tasksBox { padding:15px; }
-        .input-group { background:white; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:15px; }
-        input[type="text"], input[type="datetime-local"] { width:100%; padding:10px; margin:5px 0; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
-        .add-btn { width:100%; padding:12px; background:#1b5e20; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
-        table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
-        th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; font-size:13px; }
-        th { background:#1b5e20; color:white; }
+        #content { display: none; width: 100%; height: calc(100vh - 90px); border: none; }
+        #backFloat { position: fixed; bottom: 20px; right: 20px; background: #d32f2f; color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1001; }
+        
+        #screenSaver { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; display: none; justify-content: center; align-items: center; }
+        #screenSaverClock { color: #00ff00; font-size: 80px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-<div id="splashScreen">
-    <img src="anfa.gif" alt="Açılış">
+<div id="header">
+    <i class="fas fa-bars" id="menuBtn" onclick="toggleMenu()"></i>
+    <div id="appTitle">ANFA TAKİP</div>
+    
+    <div id="userProfileArea" class="user-profile hidden">
+        <img id="userAvatar" class="user-avatar" src="" alt="Profil">
+        <button class="btn-logout" onclick="handleLogout()">Çıkış</button>
+    </div>
 </div>
 
-<div id="header">
-    <i class="fa fa-bars" style="font-size:24px; cursor:pointer;" onclick="toggleMenu()"></i>
-    <div id="appTitle">ANFA</div>
-    <div style="width:24px;"></div>
+<div id="loginScreen" class="auth-container">
+    <h2>Saha Takip Sistemine Hoş Geldiniz</h2>
+    <p>Devam etmek ve kendi verilerinize erişmek için Google ile giriş yapın.</p>
+    <button class="btn-auth" onclick="handleLogin()">
+        <i class="fab fa-google"></i> Google ile Giriş Yap
+    </button>
 </div>
 
 <div id="menu">
-    <div class="menu-items-wrapper">
-        <div class="menu-item" onclick="goHome()"><i class="fa fa-home"></i> ANA SAYFA</div>
-        <div class="menu-item" onclick="loadPage('olay_bildir.html')"><i class="fa fa-exclamation-triangle"></i> OLAY BİLDİR</div>
-        <div class="menu-item" onclick="loadPage('park_doluluk.html')"><i class="fa fa-chart-pie"></i> PARK DOLULUK</div>
-        <div class="menu-item" onclick="loadPage('kolaj.html')"><i class="fa fa-th-large"></i> KOLAJ OLUŞTUR</div>
-        <div class="menu-item" onclick="loadPage('vardiya.html')"><i class="fa fa-clock"></i> VARDİYA TAKİP</div>
-        <div class="menu-item" onclick="loadPage('filist.html')"><i class="fa fa-address-book"></i> REHBER</div>
-        <div class="menu-item" onclick="loadPage('templates.html')"><i class="fa fa-file-alt"></i> HAZIR TUTANAKLAR</div>
-        <div class="menu-item" onclick="loadPage('personel_takip.html')"><i class="fa fa-users"></i> PERSONEL TAKİP</div>
-    </div>
-    <div class="dev-note">
-        Bu uygulama sizin için Yasin Demirgan tarafından geliştirilmiştir.
-    </div>
+    <a href="#" onclick="goHome()">Ana Sayfa / Görevler</a>
+    <a href="#" onclick="openPage('park_doluluk.html')">Park Doluluk Raporu</a>
+    <a href="#" onclick="openPage('olay_bildir.html')">Olay Bildir Pro</a>
+    <a href="#" onclick="openPage('personel_takip.html')">Personel Takip</a>
+    <a href="#" onclick="openPage('templates.html')">Dijital Tutanak</a>
+    <a href="#" onclick="openPage('vardiya_takip.html')">Vardiya Takip</a>
+    <a href="#" onclick="openPage('filist.html')">ANFA Rehber Pro</a>
 </div>
 
-<div id="content">
-    <iframe id="frame" src=""></iframe>
-</div>
-
-<div id="tasksBox">
-    <div class="input-group">
-        <h4><i class="fa fa-edit"></i> YENİ GÖREV / NOT</h4>
-        <input type="text" id="taskInput" placeholder="GÖREVİ YAZIN...">
-        <label>BAŞLANGIÇ:</label>
+<div id="tasksBox" class="hidden">
+    <div class="form-group">
+        <label>YAPILACAK İŞ / GÖREV</label>
+        <input type="text" id="taskInput" placeholder="GÖREV TANIMI GİRİNİZ...">
+    </div>
+    <div class="form-group">
+        <label>BAŞLANGIÇ TARİHİ VE SAATİ</label>
         <input type="datetime-local" id="startDateTime">
-        <label>BİTİŞ:</label>
-        <input type="datetime-local" id="endDateTime">
-        <button class="add-btn" onclick="addTask()">EKLE</button>
     </div>
+    <div class="form-group">
+        <label>BİTİŞ TARİHİ VE SAATİ</label>
+        <input type="datetime-local" id="endDateTime">
+    </div>
+    <button id="addBtn" onclick="handleAddTask()">LİSTEYE EKLE</button>
 
     <table>
         <thead>
             <tr>
                 <th>GÖREV</th>
-                <th>BAŞLAMA</th>
+                <th>BAŞLANGIÇ</th>
                 <th>BİTİŞ</th>
                 <th>İŞLEM</th>
             </tr>
         </thead>
-        <tbody id="taskList"></tbody>
+        <tbody id="taskList">
+            </tbody>
     </table>
 </div>
 
-<div id="backFloat" onclick="goHome()">
-    <i class="fa fa-arrow-left"></i>
+<iframe id="content"></iframe>
+<div id="backFloat" onclick="goHome()"><i class="fas fa-arrow-left"></i></div>
+
+<div id="screenSaver">
+    <div id="screenSaverClock">00:00:00</div>
 </div>
 
-<script src="app.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+  // BURAYA KENDİ FİREBASE KONSOLUNDAN ALDIĞIN CONFIG NESNESİNİ YAPIŞTIR
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "oveclerfaaliyet-park.firebaseapp.com",
+    projectId: "oveclerfaaliyet-park",
+    storageBucket: "oveclerfaaliyet-park.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Firebase Başlatma
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // Global erişim için fonksiyonları window nesnesine bağlıyoruz
+  window.handleLogin = async () => {
+      try {
+          await signInWithPopup(auth, provider);
+      } catch (error) {
+          console.error("Giriş hatası:", error);
+          alert("Giriş yapılırken hata oluştu: " + error.message);
+      }
+  };
+
+  window.handleLogout = () => {
+      signOut(auth).then(() => {
+          location.reload();
+      });
+  };
+
+  // Kullanıcı Durum Takibi (Oturum açıldı mı kapandı mı?)
+  let currentUserId = null;
+  let unsubscribeTasks = null;
+
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          currentUserId = user.uid;
+          document.getElementById("loginScreen").classList.add("hidden");
+          document.getElementById("tasksBox").classList.remove("hidden");
+          document.getElementById("userProfileArea").classList.remove("hidden");
+          document.getElementById("userAvatar").src = user.photoURL || "https://via.placeholder.com/32";
+          
+          // Kullanıcıya özel dinamik Firestore dinleyicisini başlat (Rules ile tam uyumlu)
+          listenToTasks(user.uid);
+      } else {
+          currentUserId = null;
+          if (unsubscribeTasks) unsubscribeTasks();
+          document.getElementById("loginScreen").classList.remove("hidden");
+          document.getElementById("tasksBox").classList.add("hidden");
+          document.getElementById("userProfileArea").classList.add("hidden");
+      }
+  });
+
+  // Görevleri Gerçek Zamanlı Listeleme
+  function listenToTasks(userId) {
+      const tasksRef = collection(db, "users", userId, "tasks");
+      const q = query(tasksRef, orderBy("createdAt", "desc")); // Yeni eklenen en üstte
+
+      unsubscribeTasks = onSnapshot(q, (snapshot) => {
+          const taskList = document.getElementById('taskList');
+          taskList.innerHTML = "";
+          
+          snapshot.forEach((docSnapshot) => {
+              const data = docSnapshot.data();
+              const id = docSnapshot.id;
+              
+              const tr = document.createElement('tr');
+              if (data.done) {
+                  tr.classList.add('task-done');
+              }
+              
+              tr.innerHTML = `
+                <td>${data.task}</td>
+                <td>${data.startDisplay || ''}</td>
+                <td>${data.endDisplay || ''}</td>
+                <td class="actions">
+                  <button onclick="handleToggleDone('${id}', ${data.done || false})">✔</button>
+                  <button onclick="handleDeleteTask('${id}')">🗑</button>
+                </td>
+              `;
+              taskList.appendChild(tr);
+          });
+      }, (error) => {
+          console.error("Firestore okuma hatası:", error);
+      });
+  }
+
+  // Görev Ekleme Fonksiyonu
+  window.handleAddTask = async () => {
+      if (!currentUserId) return;
+      
+      let taskInput = document.getElementById('taskInput');
+      let start = document.getElementById('startDateTime');
+      let end = document.getElementById('endDateTime');
+
+      if (taskInput.value.trim() === '') return;
+
+      const taskText = taskInput.value.toUpperCase();
+      const startVal = start.value ? new Date(start.value) : null;
+      const startDisplay = startVal ? startVal.toLocaleString('tr-TR', { hour12: false }) : '';
+      const endVal = end.value ? new Date(end.value) : null;
+      const endDisplay = endVal ? endVal.toLocaleString('tr-TR', { hour12: false }) : '';
+
+      try {
+          await addDoc(collection(db, "users", currentUserId, "tasks"), {
+              task: taskText,
+              startDisplay: startDisplay,
+              endDisplay: endDisplay,
+              startTimestamp: startVal ? startVal.getTime() : 0,
+              done: false,
+              createdAt: Date.now()
+          });
+
+          // Formu temizle
+          taskInput.value = '';
+          start.value = '';
+          end.value = '';
+      } catch (error) {
+          console.error("Görev eklenirken hata oluştu: ", error);
+          alert("Ekleme yetkiniz yok veya bir hata oluştu.");
+      }
+  };
+
+  // Görev Durumu Güncelleme (Tamamlandı/Yapılacak)
+  window.handleToggleDone = async (id, currentStatus) => {
+      if (!currentUserId) return;
+      const taskDocRef = doc(db, "users", currentUserId, "tasks", id);
+      try {
+          await updateDoc(taskDocRef, {
+              done: !currentStatus
+          });
+      } catch (error) {
+          console.error("Güncelleme hatası: ", error);
+      }
+  };
+
+  // Görev Silme
+  window.handleDeleteTask = async (id) => {
+      if (!currentUserId) return;
+      if (confirm("BU GÖREVİ SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?")) {
+          const taskDocRef = doc(db, "users", currentUserId, "tasks", id);
+          try {
+              await deleteDoc(taskDocRef);
+          } catch (error) {
+              console.error("Silme hatası: ", error);
+          }
+      }
+  };
+</script>
 
 <script>
-    // SPLASH KONTROLÜ
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const ss = document.getElementById('splashScreen');
-            ss.style.transition = "opacity 0.8s";
-            ss.style.opacity = "0";
-            setTimeout(() => ss.style.display = 'none', 800);
-        }, 5000);
-    });
-
-    function toggleMenu() {
-        const menu = document.getElementById("menu");
-        menu.style.left = (menu.style.left === "0px") ? "-240px" : "0px";
+function toggleMenu() {
+    const menu = document.getElementById("menu");
+    if (menu.style.left === "0px") {
+        menu.style.left = "-240px";
+    } else {
+        menu.style.left = "0px";
     }
+}
 
-    function loadPage(url) {
-        document.getElementById("content").style.display = "block";
-        document.getElementById("tasksBox").style.display = "none";
-        const frame = document.getElementById("frame");
-        
-        if(window.location.protocol === 'file:') {
-            frame.src = "file:///android_asset/" + url;
-        } else {
-            frame.src = url;
-        }
-        
-        document.getElementById("menu").style.left = "-240px";
-        document.getElementById("backFloat").style.display = "flex";
-    }
+function openPage(url) {
+    document.getElementById("tasksBox").style.display = "none";
+    document.getElementById("loginScreen").style.display = "none";
+    
+    const frame = document.getElementById("frame") || document.getElementById("content");
+    frame.style.display = "block";
+    frame.src = url;
 
-    function goHome() {
-        document.getElementById("content").style.display = "none";
+    document.getElementById("menu").style.left = "-240px";
+    document.getElementById("backFloat").style.display = "flex";
+}
+
+function goHome() {
+    const isLoginHidden = document.getElementById("loginScreen").classList.contains("hidden");
+    
+    if (isLoginHidden) {
         document.getElementById("tasksBox").style.display = "block";
-        document.getElementById("backFloat").style.display = "none";
-        document.getElementById("frame").src = "";
+    } else {
+        document.getElementById("loginScreen").style.display = "block";
     }
+    
+    document.getElementById("content").style.display = "none";
+    document.getElementById("backFloat").style.display = "none";
+    document.getElementById("content").src = "";
+}
 
-    // PWA & YÜKLEME BUTONU TETİKLEYİCİ
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // 3 saniye sonra yükleme teklifi çıkar
-        setTimeout(() => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-            }
-        }, 3000);
-    });
+// Saat ve Ekran Koruyucu Yönetimi
+let sonDokunma = Date.now();
+let ekranKoruyucuAcik = false;
+const SCREEN_TIMEOUT = 60000;
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('PWA Servis Kaydı Tamam'))
-            .catch(err => console.log('Hata:', err));
-        });
+function kullaniciHareketi() {
+    sonDokunma = Date.now();
+    if (ekranKoruyucuAcik) {
+        ekranKoruyucuAcik = false;
+        document.getElementById("screenSaver").style.display = "none";
     }
+}
+
+["touchstart", "click", "mousemove", "keydown", "scroll"].forEach(event => {
+    document.addEventListener(event, kullaniciHareketi);
+});
+
+setInterval(() => {
+    if (!ekranKoruyucuAcik && Date.now() - sonDokunma > SCREEN_TIMEOUT) {
+        ekranKoruyucuAcik = true;
+        document.getElementById("screenSaver").style.display = "flex";
+    }
+    if (ekranKoruyucuAcik) {
+        const simdi = new Date();
+        document.getElementById("screenSaverClock").innerText = simdi.toLocaleTimeString('tr-TR');
+    }
+}, 1000);
 </script>
+
 </body>
 </html>
